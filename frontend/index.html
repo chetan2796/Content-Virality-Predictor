@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Content Virality Predictor | Pre-Upload AI Simulation</title>
+  <meta name="description" content="Know if your video will go viral BEFORE you post it. Simulate audience reaction with AI agents." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="static/style.css" />
+</head>
+<body>
+  <!-- ─── NAVBAR ─────────────────────────────────────────────────── -->
+  <nav class="nav">
+    <div class="nav-inner">
+      <a class="nav-logo" href="#">
+        <span class="logo-icon">⚡</span>
+        <span>ViralityAI</span>
+      </a>
+      <div class="nav-links">
+        <a href="#how-it-works">How it Works</a>
+        <a href="#simulator" class="btn btn-ghost">Launch Simulator</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ─── HERO ──────────────────────────────────────────────────── -->
+  <section class="hero">
+    <div class="hero-glow glow-1"></div>
+    <div class="hero-glow glow-2"></div>
+    <div class="container hero-content">
+      <div class="hero-badge">🧪 AI Simulation Engine · Powered by Swarm Intelligence</div>
+      <h1 class="hero-title">
+        Will Your Video<br/>
+        <span class="gradient-text">Go Viral?</span>
+      </h1>
+      <p class="hero-subtitle">
+        Don't post and pray. Simulate exactly how thousands of audience agents will
+        react, share, and engage with your content — <strong>before you hit Upload.</strong>
+      </p>
+      <a href="#simulator" class="btn btn-primary btn-lg">
+        Start Free Simulation →
+      </a>
+      <div class="hero-stats">
+        <div class="stat"><span class="stat-num">500+</span><span class="stat-label">AI Agents</span></div>
+        <div class="stat-divider"></div>
+        <div class="stat"><span class="stat-num">5</span><span class="stat-label">Platforms</span></div>
+        <div class="stat-divider"></div>
+        <div class="stat"><span class="stat-num">&lt;60s</span><span class="stat-label">Results</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── HOW IT WORKS ──────────────────────────────────────────── -->
+  <section id="how-it-works" class="section section-dark">
+    <div class="container">
+      <div class="section-header">
+        <div class="section-badge">Process</div>
+        <h2>How the Simulation Works</h2>
+        <p>Our multi-agent engine creates a Digital Sandbox of your real audience.</p>
+      </div>
+      <div class="steps-grid">
+        <div class="step-card">
+          <div class="step-icon">📝</div>
+          <div class="step-num">01</div>
+          <h3>Input Your Script</h3>
+          <p>Paste your video script or describe your content idea. Select your target platform and audience segment.</p>
+        </div>
+        <div class="step-arrow">→</div>
+        <div class="step-card">
+          <div class="step-icon">🤖</div>
+          <div class="step-num">02</div>
+          <h3>Agent Simulation</h3>
+          <p>500+ AI personas with distinct personalities, habits, and preferences react to your content in a simulated social environment.</p>
+        </div>
+        <div class="step-arrow">→</div>
+        <div class="step-card">
+          <div class="step-icon">📊</div>
+          <div class="step-num">03</div>
+          <h3>Virality Report</h3>
+          <p>Receive a detailed score, sentiment breakdown, share probability, and actionable improvements — before you post.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── SIMULATOR ─────────────────────────────────────────────── -->
+  <section id="simulator" class="section">
+    <div class="container">
+      <div class="section-header">
+        <div class="section-badge">Simulator</div>
+        <h2>Run Your Simulation</h2>
+        <p>Configure your content and instantly predict its viral potential.</p>
+      </div>
+
+      <!-- Tabs -->
+      <div class="tabs">
+        <button class="tab-btn active" data-tab="predict">Single Script</button>
+        <button class="tab-btn" data-tab="abtest">A/B Test</button>
+      </div>
+
+      <!-- Single Prediction Tab -->
+      <div id="tab-predict" class="tab-content active">
+        <div class="sim-grid">
+          <div class="sim-panel">
+            <h3 class="panel-title">Content Input</h3>
+
+            <div class="form-group">
+              <label for="platform">Platform</label>
+              <div class="select-wrapper">
+                <select id="platform">
+                  <option value="youtube">🎬 YouTube</option>
+                  <option value="tiktok">🎵 TikTok</option>
+                  <option value="instagram">📸 Instagram</option>
+                  <option value="twitter">🐦 Twitter (X)</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="audience">Target Audience</label>
+              <div class="select-wrapper">
+                <select id="audience">
+                  <option value="general">🌍 General Audience</option>
+                  <option value="gen_z">⚡ Gen Z (18-24)</option>
+                  <option value="millennials">💼 Millennials (25-40)</option>
+                  <option value="tech_enthusiasts">🖥️ Tech Enthusiasts</option>
+                  <option value="corporate_professionals">🏢 Corporate Professionals</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="content_type">Content Type</label>
+              <div class="select-wrapper">
+                <select id="content_type">
+                  <option value="entertainment">🎭 Entertainment</option>
+                  <option value="educational">📚 Educational</option>
+                  <option value="news">📰 News / Commentary</option>
+                  <option value="marketing">📢 Marketing / Brand</option>
+                  <option value="vlog">🎥 Vlog / Lifestyle</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="script">Your Script / Idea</label>
+              <div class="char-counter-wrapper">
+                <textarea
+                  id="script"
+                  placeholder="Paste your video script here, or describe your video idea in detail. Include the hook, main content points, and call-to-action..."
+                  rows="10"
+                ></textarea>
+                <div class="char-counter"><span id="char-count">0</span> / 10,000</div>
+              </div>
+              <p class="form-hint">💡 Include your opening hook for the most accurate simulation.</p>
+            </div>
+
+            <button id="predict-btn" class="btn btn-primary btn-full" onclick="runPrediction()">
+              <span class="btn-text">🚀 Simulate Virality</span>
+              <span class="btn-loader hidden">
+                <span class="spinner"></span> Simulating...
+              </span>
+            </button>
+          </div>
+
+          <!-- Results Panel (MiroFish Style) -->
+          <div class="sim-panel sim-panel-full" id="results-panel">
+            <div id="results-placeholder" class="results-placeholder">
+              <div class="placeholder-icon">🦠</div>
+              <h3>Swarm Intelligence Simulator</h3>
+              <p>Launch the simulation to see agent nodes connect and react in real-time.</p>
+            </div>
+            
+            <div id="results-content" class="hidden results-dashboard">
+              <!-- Left: Swarm Visualization -->
+              <div class="swarm-container">
+                <canvas id="swarm-canvas"></canvas>
+                <div class="swarm-overlay">
+                  <div class="swarm-badge">Live Agent Swarm</div>
+                  <div class="swarm-controls">
+                    <button class="btn-icon" onclick="resetSwarmView()" title="Reset View">🔄</button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Right: Global Intel & Detail Sidebar -->
+              <div class="intel-sidebar">
+                <div id="global-stats-content"></div>
+                <div id="node-details-sidebar" class="node-sidebar hidden">
+                  <div class="sidebar-header">
+                    <h4>Agent Intel</h4>
+                    <button class="close-btn" onclick="closeSidebar()">×</button>
+                  </div>
+                  <div id="agent-detail-body"></div>
+                </div>
+              </div>
+
+              <!-- Bottom: Detailed Report -->
+              <div class="full-report-section" id="full-report-content"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- A/B Test Tab -->
+      <div id="tab-abtest" class="tab-content hidden">
+        <div class="ab-grid">
+          <div class="sim-panel">
+            <h3 class="panel-title">Version A</h3>
+            <textarea id="script_a" placeholder="Paste Version A of your script here..." rows="10"></textarea>
+          </div>
+          <div class="vs-divider">VS</div>
+          <div class="sim-panel">
+            <h3 class="panel-title">Version B</h3>
+            <textarea id="script_b" placeholder="Paste Version B of your script here..." rows="10"></textarea>
+          </div>
+        </div>
+        <div class="ab-options">
+          <div class="form-group">
+            <label for="ab_platform">Platform</label>
+            <div class="select-wrapper">
+              <select id="ab_platform">
+                <option value="youtube">🎬 YouTube</option>
+                <option value="tiktok">🎵 TikTok</option>
+                <option value="instagram">📸 Instagram</option>
+                <option value="twitter">🐦 Twitter (X)</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="ab_audience">Target Audience</label>
+            <div class="select-wrapper">
+              <select id="ab_audience">
+                <option value="general">🌍 General Audience</option>
+                <option value="gen_z">⚡ Gen Z (18-24)</option>
+                <option value="millennials">💼 Millennials (25-40)</option>
+                <option value="tech_enthusiasts">🖥️ Tech Enthusiasts</option>
+                <option value="corporate_professionals">🏢 Corporate Professionals</option>
+              </select>
+            </div>
+          </div>
+          <button class="btn btn-primary" onclick="runABTest()">
+            <span class="btn-text">⚡ Run A/B Test</span>
+            <span class="btn-loader hidden"><span class="spinner"></span> Comparing...</span>
+          </button>
+        </div>
+        <div id="ab-results" class="hidden"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── FOOTER ─────────────────────────────────────────────────── -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-inner">
+        <span>⚡ <strong>ViralityAI</strong> — Know Before You Post</span>
+        <span>Powered by Multi-Agent AI Simulation</span>
+      </div>
+    </div>
+  </footer>
+
+  <script src="static/app.js"></script>
+</body>
+</html>
