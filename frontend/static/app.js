@@ -21,7 +21,26 @@ document.querySelectorAll(".tab-btn").forEach((btn) => {
     document.querySelectorAll(".tab-content").forEach((c) => c.classList.add("hidden"));
     btn.classList.add("active");
     document.getElementById(`tab-${tab}`).classList.remove("hidden");
+    
+    // Google Analytics Event
+    if (typeof gtag === 'function') {
+      gtag('event', 'tab_switch', {
+        'tab_name': tab
+      });
+    }
   });
+});
+
+// ── CTA Clicks ─────────────────────────────────────────────────────────────
+['hero-cta', 'nav-cta'].forEach(id => {
+  const el = document.getElementById(id);
+  if (el) {
+    el.addEventListener('click', () => {
+      if (typeof gtag === 'function') {
+        gtag('event', 'cta_click', { 'button_id': id });
+      }
+    });
+  }
 });
 
 // ── Utility ───────────────────────────────────────────────────────────────
@@ -307,6 +326,16 @@ function showAgentDetail(a) {
   const body = document.getElementById("agent-detail-body");
   
   sidebar.classList.remove("hidden");
+  
+  // Google Analytics Event
+  if (typeof gtag === 'function') {
+    gtag('event', 'view_agent_detail', {
+      'agent_name': a.agent_name,
+      'sentiment': a.sentiment,
+      'would_share': a.would_share
+    });
+  }
+
   body.innerHTML = `
     <div class="agent-intel-card">
       <div class="intel-tag-group">
@@ -398,9 +427,17 @@ async function runPrediction() {
     content_type: document.getElementById("content_type").value,
   };
 
-  setLoading("predict-btn", true);
   document.getElementById("results-placeholder").classList.add("hidden");
   document.getElementById("results-content").classList.add("hidden");
+
+  // Google Analytics Event
+  if (typeof gtag === 'function') {
+    gtag('event', 'simulation_started', {
+      'platform': payload.platform,
+      'audience': payload.audience,
+      'content_type': payload.content_type
+    });
+  }
 
   try {
     const res = await fetch(`${API_BASE}/predict`, {
@@ -416,9 +453,27 @@ async function runPrediction() {
     }
 
     renderDashboard(json.report);
+    
+    // Google Analytics Event
+    if (typeof gtag === 'function') {
+      gtag('event', 'simulation_completed', {
+        'platform': payload.platform,
+        'virality_score': json.report.virality_score,
+        'share_probability': json.report.share_probability
+      });
+    }
+
     document.getElementById("results-content").scrollIntoView({ behavior: "smooth", block: "start" });
   } catch (err) {
     showError(err.message);
+    
+    // Google Analytics Event
+    if (typeof gtag === 'function') {
+      gtag('event', 'simulation_failed', {
+        'error_message': err.message
+      });
+    }
+
     document.getElementById("results-placeholder").classList.remove("hidden");
   } finally {
     setLoading("predict-btn", false);
@@ -454,6 +509,14 @@ async function runABTest() {
   const abResults = document.getElementById("ab-results");
   abResults.classList.add("hidden");
 
+  // Google Analytics Event
+  if (typeof gtag === 'function') {
+    gtag('event', 'ab_test_started', {
+      'platform': payload.platform,
+      'audience': payload.audience
+    });
+  }
+
   try {
     const res = await fetch(`${API_BASE}/ab-test`, {
       method: "POST",
@@ -487,9 +550,26 @@ async function runABTest() {
     abResults.classList.remove("hidden");
     renderReport(r.version_a, "ab-report-a");
     renderReport(r.version_b, "ab-report-b");
+    
+    // Google Analytics Event
+    if (typeof gtag === 'function') {
+      gtag('event', 'ab_test_completed', {
+        'winner': r.winner,
+        'score_a': r.version_a.virality_score,
+        'score_b': r.version_b.virality_score
+      });
+    }
+
     abResults.scrollIntoView({ behavior: "smooth" });
   } catch (err) {
     showError(err.message);
+
+    // Google Analytics Event
+    if (typeof gtag === 'function') {
+      gtag('event', 'ab_test_failed', {
+        'error_message': err.message
+      });
+    }
   } finally {
     if (abBtn) {
       abBtn.disabled = false;

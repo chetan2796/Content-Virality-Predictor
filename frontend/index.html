@@ -4,6 +4,18 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Content Virality Predictor | Pre-Upload AI Simulation</title>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-436T8FFPH6"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'G-436T8FFPH6', {
+      'page_title' : 'Landing Page',
+      'cookie_flags': 'SameSite=None;Secure'
+    });
+  </script>
   <meta name="description" content="Know if your video will go viral BEFORE you post it. Simulate audience reaction with AI agents." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
@@ -19,7 +31,7 @@
       </a>
       <div class="nav-links">
         <a href="#how-it-works">How it Works</a>
-        <a href="#simulator" class="btn btn-ghost">Launch Simulator</a>
+        <a href="#simulator" class="btn btn-ghost" id="nav-cta">Launch Simulator</a>
       </div>
     </div>
   </nav>
@@ -38,7 +50,7 @@
         Don't post and pray. Simulate exactly how thousands of audience agents will
         react, share, and engage with your content — <strong>before you hit Upload.</strong>
       </p>
-      <a href="#simulator" class="btn btn-primary btn-lg">
+      <a href="#simulator" class="btn btn-primary btn-lg" id="hero-cta">
         Start Free Simulation →
       </a>
       <div class="hero-stats">
