@@ -156,7 +156,18 @@
             </div>
 
             <div class="form-group">
-              <label for="script">Your Script / Idea</label>
+              <label>Upload Video / Reel (Auto-Transcribe)</label>
+              <div class="upload-wrapper" style="display:flex; gap:10px; align-items:center; margin-bottom:12px;">
+                <input type="file" id="video_upload" class="file-input" accept="video/*,audio/*" style="flex:1; padding:10px; border:1px solid rgba(255,255,255,0.1); border-radius:8px; background:rgba(0,0,0,0.2); color:#fff;" />
+                <button id="transcribe-btn" class="btn btn-secondary" onclick="transcribeVideo()" style="white-space:nowrap; padding:10px 16px;">
+                  <span class="btn-text">🎙️ Extract Script</span>
+                  <span class="btn-loader hidden"><span class="spinner"></span> Extracting...</span>
+                </button>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="script">Your Script / Idea (or Extracted Text)</label>
               <div class="char-counter-wrapper">
                 <textarea
                   id="script"
@@ -185,20 +196,18 @@
             </div>
             
             <div id="results-content" class="hidden results-dashboard">
-              <!-- Left: Swarm Visualization -->
+              <!-- Swarm Visualization area -->
               <div class="swarm-container">
                 <canvas id="swarm-canvas"></canvas>
+                
                 <div class="swarm-overlay">
-                  <div class="swarm-badge">Live Agent Swarm</div>
+                  <div class="swarm-badge">Live Agent Swarm Intelligence</div>
                   <div class="swarm-controls">
                     <button class="btn-icon" onclick="resetSwarmView()" title="Reset View">🔄</button>
                   </div>
                 </div>
-              </div>
 
-              <!-- Right: Global Intel & Detail Sidebar -->
-              <div class="intel-sidebar">
-                <div id="global-stats-content"></div>
+                <!-- Floating Intel Card (Glassmorphism) -->
                 <div id="node-details-sidebar" class="node-sidebar hidden">
                   <div class="sidebar-header">
                     <h4>Agent Intel</h4>
@@ -206,6 +215,11 @@
                   </div>
                   <div id="agent-detail-body"></div>
                 </div>
+              </div>
+
+              <!-- Stats & Overview -->
+              <div class="intel-sidebar">
+                <div id="global-stats-content"></div>
               </div>
 
               <!-- Bottom: Detailed Report -->
@@ -274,6 +288,6 @@
     </div>
   </footer>
 
-  <script src="static/app.js"></script>
+  <script src="static/app2.js?v=3"></script>
 </body>
 </html>

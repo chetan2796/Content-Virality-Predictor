@@ -2,8 +2,10 @@
 FastAPI Router — All API endpoints
 """
 import logging
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, File, UploadFile
 from fastapi.responses import JSONResponse
+import tempfile
+import os
 
 from .models import (
     PredictRequest,
@@ -12,6 +14,7 @@ from .models import (
     ABTestResponse,
 )
 from .engine import run_virality_simulation, run_ab_test
+from .video_processor import get_transcript_from_video
 
 logger = logging.getLogger("cvp.router")
 router = APIRouter()
@@ -21,6 +24,37 @@ router = APIRouter()
 async def health():
     """Simple health check endpoint."""
     return {"status": "ok", "service": "Content Virality Predictor API"}
+
+
+@router.post("/transcribe")
+async def transcribe_video(file: UploadFile = File(...)):
+    """
+    Extracts text from uploading a video file via audio transcription.
+    """
+    if not file.content_type.startswith("video/") and not file.content_type.startswith("audio/"):
+        raise HTTPException(status_code=400, detail="Invalid file type. Please upload a video or audio file.")
+
+    try:
+        # Save temp file
+        ext = os.path.splitext(file.filename)[1] or ".mp4"
+        with tempfile.NamedTemporaryFile(delete=False, suffix=ext) as tmp:
+            content = await file.read()
+            tmp.write(content)
+            tmp_path = tmp.name
+
+        try:
+            transcript = get_transcript_from_video(tmp_path)
+            if not transcript:
+                raise HTTPException(status_code=400, detail="Could not process video or extract audio.")
+            return {"success": True, "transcript": transcript}
+        finally:
+            # Clean up out of temp file
+            if os.path.exists(tmp_path):
+                os.remove(tmp_path)
+                
+    except Exception as e:
+        logger.exception(f"Error in /transcribe: {e}")
+        raise HTTPException(status_code=500, detail=f"Transcription failed: {str(e)}")
 
 
 @router.post("/predict", response_model=PredictResponse)

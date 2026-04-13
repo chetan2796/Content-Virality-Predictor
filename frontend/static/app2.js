@@ -114,41 +114,100 @@ function animateRing() {
 }
 
 // ── Render Full Virality Report ────────────────────────────────────────────
-// ── Swarm Visualization Class ──────────────────────────────────────────────
+// ── Swarm Visualization Class ──
 class SwarmVisualization {
   constructor(canvasId, agents) {
     this.canvas = document.getElementById(canvasId);
     this.ctx = this.canvas.getContext("2d");
     
-    // SWARM PROJECTION: Clone core agents to create a "thousand-agent" feel
-    const swarmSize = 100;
+    // Config: Massive swarm for complex network feel
+    this.totalAgents = 150; 
     this.agents = [];
+    this.particles = []; // Floating communication packets
+    this.connections = []; // edges
     
-    for (let i = 0; i < swarmSize; i++) {
-        const parent = agents[i % agents.length];
-        this.agents.push({
-          ...parent,
-          id: i,
-          x: Math.random() * this.canvas.width,
-          y: Math.random() * this.canvas.height,
-          vx: (Math.random() - 0.5) * 3,
-          vy: (Math.random() - 0.5) * 3,
-          radius: 5 + Math.random() * 6,
-          color: this.getSentimentColor(parent.sentiment),
-          pulse: Math.random() * Math.PI,
-          isCore: i < agents.length
-        });
-    }
-    this.animationId = null;
     this.resize();
+    this.init(agents);
+    
+    this.animationId = null;
     window.addEventListener("resize", () => this.resize());
     this.canvas.onclick = (e) => this.handleClick(e);
+    
+    // Camera state
+    this.mouseX = this.canvas.width / 2;
+    this.mouseY = this.canvas.height / 2;
+    this.canvas.onmousemove = (e) => {
+      const rect = this.canvas.getBoundingClientRect();
+      this.mouseX = e.clientX - rect.left;
+      this.mouseY = e.clientY - rect.top;
+    };
+  }
+
+  init(coreAgents) {
+    // 1. Create Core Agents
+    for (let i = 0; i < coreAgents.length; i++) {
+      this.agents.push(this.createAgent(coreAgents[i], true));
+    }
+    
+    // 2. Fill with "Observer/Sub-nodes"
+    for (let i = 0; i < this.totalAgents - coreAgents.length; i++) {
+      this.agents.push(this.createAgent(null, false));
+    }
+
+    // 3. Network Construction: Connect observers to form massive star architectures
+    const relations = ["RELATES_TO", "REPORTS_ON", "COLLABORATES_WITH", "INFLUENCES", "SHARES", "FAVORITES"];
+    
+    for (let i = 0; i < this.agents.length; i++) {
+       if (!this.agents[i].isCore) {
+         // Connect to core agents
+         const connects = 1 + Math.floor(Math.random() * 2);
+         for (let j = 0; j < connects; j++) {
+           const targetIdx = Math.floor(Math.random() * coreAgents.length);
+           const relation = relations[Math.floor(Math.random() * relations.length)];
+           this.connections.push({ a: i, b: targetIdx, rel: relation });
+         }
+         // Randomly connect to other non-core nodes
+         if (Math.random() < 0.2) {
+            const targetIdx = coreAgents.length + Math.floor(Math.random() * (this.totalAgents - coreAgents.length));
+            if (targetIdx !== i) {
+               this.connections.push({ a: i, b: targetIdx, rel: "FOLLOWS" });
+            }
+         }
+       } else {
+         // Core agents interconnected
+         for (let j = 0; j < coreAgents.length; j++) {
+            if (i !== j && Math.random() < 0.6) {
+               this.connections.push({ a: i, b: j, rel: "DRIVES_TREND" });
+            }
+         }
+       }
+    }
+  }
+
+  createAgent(data, isCore) {
+    const colors = ["#ff9800", "#2196f3", "#4caf50", "#e91e63", "#9e9e9e"];
+    const col = data ? this.getSentimentColor(data.sentiment) : colors[Math.floor(Math.random() * colors.length)];
+    
+    return {
+      ...data,
+      id: Math.random(),
+      x: this.canvas.width / 2 + (Math.random() - 0.5) * 800,
+      y: this.canvas.height / 2 + (Math.random() - 0.5) * 600,
+      vx: 0,
+      vy: 0,
+      radius: isCore ? 6 + Math.random() * 4 : 2 + Math.random() * 3,
+      color: col,
+      isCore: isCore,
+      pulse: Math.random() * Math.PI,
+      active: false,
+      mass: isCore ? 5 : 1
+    };
   }
 
   getSentimentColor(s) {
-    if (s === "positive") return "#4ade80";
-    if (s === "negative") return "#f87171";
-    return "#facc15";
+    if (s === "positive") return "#4caf50";
+    if (s === "negative") return "#f44336";
+    return "#ff9800";
   }
 
   resize() {
@@ -163,9 +222,10 @@ class SwarmVisualization {
     const y = e.clientY - rect.top;
 
     const clicked = this.agents.find(a => {
+      if (!a.isCore) return false;
       const dx = a.x - x;
       const dy = a.y - y;
-      return Math.sqrt(dx * dx + dy * dy) < a.radius + 10;
+      return Math.sqrt(dx * dx + dy * dy) < a.radius + 15;
     });
 
     if (clicked) {
@@ -176,78 +236,151 @@ class SwarmVisualization {
   }
 
   update() {
-    this.agents.forEach(a => {
-      a.x += a.vx;
-      a.y += a.vy;
+    const K_REPULSE = 80;
+    const K_SPRING = 0.003;
+    const L_TARGET = 100;
+    const CENTER_PULL = 0.0005;
+    const DAMPING = 0.85;
 
-      // Bounce
-      if (a.x < a.radius || a.x > this.canvas.width - a.radius) a.vx *= -1;
-      if (a.y < a.radius || a.y > this.canvas.height - a.radius) a.vy *= -1;
-
-      // INDIVIDUALITY PHYSICS: Stronger repulsion, weaker global attraction
-      this.agents.forEach(other => {
-        if (a === other) return;
-        const dx = other.x - a.x;
-        const dy = other.y - a.y;
-        const dist = Math.sqrt(dx * dx + dy * dy);
-        
-        // Strong repulsion when too close (prevents overlapping blocks)
-        if (dist < 60) {
-          a.vx -= dx * 0.005;
-          a.vy -= dy * 0.005;
-        } 
-        // Very weak attraction to keep them on screen but not clumped
-        else if (dist > 400) {
-          a.vx += dx * 0.00002;
-          a.vy += dy * 0.00002;
-        }
-      });
-
-      // Speed limit
-      const speed = Math.sqrt(a.vx * a.vx + a.vy * a.vy);
-      if (speed > 2) {
-        a.vx = (a.vx / speed) * 2;
-        a.vy = (a.vy / speed) * 2;
-      }
-
-      a.pulse += 0.05;
-    });
-  }
-
-  draw() {
-    this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-
-    // Draw Connections (Relationships)
-    this.ctx.lineWidth = 1;
+    // Repulsion
     for (let i = 0; i < this.agents.length; i++) {
+      let a = this.agents[i];
+      // center pull
+      a.vx += (this.canvas.width / 2 - a.x) * CENTER_PULL;
+      a.vy += (this.canvas.height / 2 - a.y) * CENTER_PULL;
+
       for (let j = i + 1; j < this.agents.length; j++) {
-        const a = this.agents[i];
-        const b = this.agents[j];
-        const dx = a.x - b.x;
-        const dy = a.y - b.y;
-        const dist = Math.sqrt(dx * dx + dy * dy);
-        // Only connect very close nodes to avoid a "big web" look
-        if (dist < 80) {
-          this.ctx.strokeStyle = `rgba(139, 92, 246, ${0.4 - dist / 200})`;
-          this.ctx.beginPath();
-          this.ctx.moveTo(a.x, a.y);
-          this.ctx.lineTo(b.x, b.y);
-          this.ctx.stroke();
+        let b = this.agents[j];
+        let dx = a.x - b.x;
+        let dy = a.y - b.y;
+        let distSq = dx * dx + dy * dy;
+        // Optimization: Only compute repulsion if close enough
+        if (distSq < 25000 && distSq > 0.1) {
+            let dist = Math.sqrt(distSq);
+            let force = (K_REPULSE * a.mass * b.mass) / distSq;
+            let fx = (dx / dist) * force;
+            let fy = (dy / dist) * force;
+            a.vx += fx / a.mass;
+            a.vy += fy / a.mass;
+            b.vx -= fx / b.mass;
+            b.vy -= fy / b.mass;
         }
       }
     }
 
-    // Draw Nodes
+    // Springs
+    for (let i = 0; i < this.connections.length; i++) {
+        let a = this.agents[this.connections[i].a];
+        let b = this.agents[this.connections[i].b];
+        let dx = b.x - a.x;
+        let dy = b.y - a.y;
+        let dist = Math.sqrt(dx * dx + dy * dy) || 1;
+        let force = (dist - L_TARGET) * K_SPRING;
+        let fx = (dx / dist) * force;
+        let fy = (dy / dist) * force;
+        
+        a.vx += fx / a.mass;
+        a.vy += fy / a.mass;
+        b.vx -= fx / b.mass;
+        b.vy -= fy / b.mass;
+    }
+
+    // Physics step
     this.agents.forEach(a => {
-      // Outer glow
-      const glow = Math.sin(a.pulse) * 5 + 10;
+      a.x += a.vx;
+      a.y += a.vy;
+      a.vx *= DAMPING;
+      a.vy *= DAMPING;
+
+      // Subtle mouse effect
+      if (a.isCore) {
+        let dx = this.mouseX - a.x;
+        let dy = this.mouseY - a.y;
+        let dSq = dx * dx + dy * dy;
+        if (dSq < 15000 && dSq > 1) {
+            a.vx -= (dx / Math.sqrt(dSq)) * 0.2; // Slight push away
+            a.vy -= (dy / Math.sqrt(dSq)) * 0.2;
+        }
+      }
+
+      a.pulse += 0.05;
+      
+      // Spawn particles
+      if (Math.random() < 0.05) {
+         let targetConn = this.connections[Math.floor(Math.random() * this.connections.length)];
+         if (targetConn.a === this.agents.indexOf(a)) {
+            let target = this.agents[targetConn.b];
+            this.particles.push({
+               x: a.x, y: a.y, tx: target.x, ty: target.y,
+               progress: 0, speed: 0.01 + Math.random() * 0.02, color: "#fff"
+            });
+         }
+      }
+    });
+
+    // Particles step
+    this.particles = this.particles.filter(p => {
+       p.progress += p.speed;
+       return p.progress < 1;
+    });
+  }
+
+  draw() {
+    this.ctx.fillStyle = "#0c0d10"; // Dark slightly blueish background
+    this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+    
+    // Abstract dot grid background
+    this.ctx.fillStyle = "rgba(255, 255, 255, 0.05)";
+    for (let x = 0; x < this.canvas.width; x += 20) {
+        for (let y = 0; y < this.canvas.height; y += 20) {
+            this.ctx.fillRect(x, y, 1, 1);
+        }
+    }
+
+    // 1. Draw Static Connections (Vibrant pink lines simulating AI knowledge graph)
+    this.ctx.lineWidth = 0.5;
+    this.connections.forEach((conn, index) => {
+      let a = this.agents[conn.a];
+      let b = this.agents[conn.b];
+      
+      this.ctx.strokeStyle = `rgba(233, 30, 99, 0.3)`; // Bright pink lines
+      this.ctx.beginPath();
+      this.ctx.moveTo(a.x, a.y);
+      this.ctx.lineTo(b.x, b.y);
+      this.ctx.stroke();
+
+      // Render relationship text occasionally to mimic Graph DB
+      if (index % 12 === 0) {
+          let midX = (a.x + b.x) / 2;
+          let midY = (a.y + b.y) / 2;
+          this.ctx.fillStyle = "rgba(255,255,255,0.4)";
+          this.ctx.font = "6px Inter";
+          this.ctx.textAlign = "center";
+          this.ctx.fillText(conn.rel, midX, midY);
+      }
+    });
+
+    // 2. Draw Moving Communication Particles
+    this.particles.forEach(p => {
+      let x = lerp(p.x, p.tx, p.progress);
+      let y = lerp(p.y, p.ty, p.progress);
+      this.ctx.fillStyle = p.color;
+      this.ctx.beginPath();
+      this.ctx.arc(x, y, 1.2, 0, Math.PI * 2);
+      this.ctx.fill();
+    });
+
+    // 3. Draw Nodes
+    this.agents.forEach(a => {
+      let glow = a.isCore ? Math.sin(a.pulse) * 5 + 5 : 0;
       this.ctx.shadowBlur = glow;
       this.ctx.shadowColor = a.color;
       
       this.ctx.fillStyle = a.color;
+      
       if (a.active) {
-        this.ctx.lineWidth = 3;
         this.ctx.strokeStyle = "#fff";
+        this.ctx.lineWidth = 2;
         this.ctx.beginPath();
         this.ctx.arc(a.x, a.y, a.radius + 4, 0, Math.PI * 2);
         this.ctx.stroke();
@@ -257,18 +390,23 @@ class SwarmVisualization {
       this.ctx.arc(a.x, a.y, a.radius, 0, Math.PI * 2);
       this.ctx.fill();
 
-      // Label
-      this.ctx.shadowBlur = 0;
-      this.ctx.fillStyle = "rgba(255,255,255,0.7)";
-      this.ctx.font = "10px Inter";
-      this.ctx.textAlign = "center";
-      this.ctx.fillText(a.agent_name.split(",")[0], a.x, a.y + a.radius + 15);
+      // Labels
+      if (a.isCore || a.radius > 3.5) {
+        this.ctx.shadowBlur = 0;
+        this.ctx.fillStyle = a.isCore ? "rgba(255,255,255,0.9)" : "rgba(255,255,255,0.5)";
+        this.ctx.font = a.isCore ? "bold 10px Inter" : "7px Inter";
+        this.ctx.textAlign = "center";
+        
+        let label = a.isCore ? a.agent_name.split(",")[0].toUpperCase() : "Node-" + Math.floor(a.id * 1000);
+        this.ctx.fillText(label, a.x, a.y - a.radius - (a.isCore ? 6 : 3));
+      }
     });
+    this.ctx.shadowBlur = 0;
 
     this.update();
     this.animationId = requestAnimationFrame(() => this.draw());
   }
-
+  
   stop() {
     if (this.animationId) cancelAnimationFrame(this.animationId);
   }
@@ -410,6 +548,44 @@ function escapeHtml(str) {
     .replace(/</g, "&lt;")
     .replace(/>/g, "&gt;")
     .replace(/"/g, "&quot;");
+}
+
+// ── Upload & Transcribe Video ───────────────────────────────────────────────
+async function transcribeVideo() {
+  const fileInput = document.getElementById("video_upload");
+  if (!fileInput.files || fileInput.files.length === 0) {
+    showError("Please select a video or audio file first.");
+    return;
+  }
+
+  const file = fileInput.files[0];
+  const formData = new FormData();
+  formData.append("file", file);
+
+  setLoading("transcribe-btn", true);
+
+  try {
+    const res = await fetch(`${API_BASE}/transcribe`, {
+      method: "POST",
+      body: formData,
+    });
+    
+    const json = await res.json();
+    if (!res.ok || !json.success) {
+      throw new Error(json.detail || json.error || "Transcription failed");
+    }
+
+    const scriptArea = document.getElementById("script");
+    if (scriptArea) {
+      scriptArea.value = json.transcript;
+      const event = new Event('input', { bubbles: true });
+      scriptArea.dispatchEvent(event);
+    }
+  } catch (err) {
+    showError(err.message);
+  } finally {
+    setLoading("transcribe-btn", false);
+  }
 }
 
 // ── Run Single Prediction ─────────────────────────────────────────────────
